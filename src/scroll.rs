@@ -23,8 +23,9 @@ pub fn init() {
 
 #[cfg(target_os = "windows")]
 fn windows_scroll(delta: i64, step: i64) {
-    use windows_sys::Win32::UI::Input::KeyboardAndMouse::{
-        SendInput, INPUT, INPUT_MOUSE, MOUSEEVENTF_WHEEL, MOUSEINPUT,
+    use windows_sys::Win32::Foundation::POINT;
+    use windows_sys::Win32::UI::WindowsAndMessaging::{
+        GetCursorPos, GetForegroundWindow, PostMessageW, WM_MOUSEWHEEL,
     };
 
     let wheel_delta: i32 = if delta >= 0 {
@@ -33,19 +34,15 @@ fn windows_scroll(delta: i64, step: i64) {
         -((step as i32) * 120)
     };
 
-    let mut input: INPUT = unsafe { std::mem::zeroed() };
-    input.r#type = INPUT_MOUSE;
-    input.Anonymous.mi = MOUSEINPUT {
-        dx: 0,
-        dy: 0,
-        mouseData: wheel_delta as u32,
-        dwFlags: MOUSEEVENTF_WHEEL,
-        time: 0,
-        dwExtraInfo: 0,
-    };
+    let hwnd = unsafe { GetForegroundWindow() };
+    let mut point = POINT { x: 0, y: 0 };
+    unsafe { GetCursorPos(&mut point) };
+
+    let w_param = ((wheel_delta as usize) << 16) as usize;
+    let l_param = ((point.y as isize) << 16) | (point.x as isize & 0xFFFF);
 
     unsafe {
-        SendInput(1, &input, std::mem::size_of::<INPUT>() as i32);
+        PostMessageW(hwnd, WM_MOUSEWHEEL, w_param, l_param as isize);
     }
 }
 
