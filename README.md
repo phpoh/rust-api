@@ -12,6 +12,7 @@
 | 🏥 健康检查接口 | `GET /health` — 返回服务状态和时间戳 |
 | 👋 问候接口 | `GET /greet?name=xxx` — 返回欢迎消息 |
 | 🎮 WebSocket 表冠控制 | `GET /ws/crown` — 实时控制，加速度算法 |
+| 🖥️ 系统级滚动 | 跨平台支持，控制前台窗口真正滚动 |
 | 🌈 科幻终端日志 | 彩色输出，速度等级可视化 |
 | 📦 单文件部署 | 编译后只有一个 exe，无需运行时 |
 
@@ -24,9 +25,10 @@ rust-api/
 ├── 📄 Cargo.toml     ← 📋 项目配置（相当于 Java 的 pom.xml）
 ├── 📄 Cargo.lock     ← 🔒 依赖版本锁定（自动生成，别手动改）
 ├── 📄 GUIDE.md       ← 📖 工程化完整指南（部署/打包/运维）
-├── 📄 test.html      ← 🧪 WebSocket 测试页面
+├── 📄 test.html      ← 🧪 WebSocket 测试页面（中文界面）
 ├── 📁 src/
-│   └── main.rs       ← 🏠 程序入口（所有接口都在这里）
+│   ├── main.rs       ← 🏠 程序入口（路由和接口处理）
+│   └── scroll.rs     ← 🖥️ 跨平台系统滚动模块
 ├── 📁 target/        ← 🏗️ 编译输出（git 已忽略）
 └── 📁 .gitignore     ← 🚫 Git 忽略规则
 ```
@@ -105,7 +107,7 @@ curl "http://localhost:3000/greet?name=Tony"
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `delta` | 整数 | 旋转增量（正=向上，负=向下） |
+| `delta` | 整数 | 旋转增量（正=向上滑，负=向下滑） |
 | `speed` | 浮点数 | 旋转速度，范围 0.0 ~ 1.0 |
 
 服务端返回：
@@ -118,6 +120,8 @@ curl "http://localhost:3000/greet?name=Tony"
 | `position` | 当前滚动位置（全局累加） |
 | `step` | 实际移动步长（经过加速度计算） |
 | `velocity` | 速度等级名称 |
+
+> 发送消息后，**前台窗口会真正滚动**。支持 Windows 和 macOS，编译时自动选择平台实现。
 
 ---
 
@@ -148,13 +152,14 @@ curl "http://localhost:3000/greet?name=Tony"
 
 ## 🧪 WebSocket 测试页面
 
-项目自带测试页面 `test.html`：
+项目自带中文测试页面 `test.html`：
 
 1. 🖱️ 双击打开 `test.html`
-2. 🔗 点击 **Connect** 连接服务
-3. ⚙️ 设置 Delta 和 Speed 参数
-4. 📤 点击 **Send Crown Input** 发送
-5. 🚀 点击 **Rapid Fire** 模拟连续加速操作
+2. 🔗 点击 **连接** 连接服务
+3. ⚙️ 设置增量和速度参数
+4. 📤 点击 **发送** 手动发送一次
+5. 🚀 点击 **连发** 模拟连续加速操作
+6. ⏱️ 点击 **开始定时滚动**，然后切到其他窗口观察滚动效果
 
 ---
 
@@ -195,6 +200,8 @@ chmod +x /opt/rust-api/rust-api
 | ⚡ Tokio | 1.x | 异步运行时 |
 | 📝 Serde | 1.x | JSON 序列化 |
 | 🎨 Colored | 2.x | 终端彩色输出 |
+| 🪟 windows-sys | 0.61 | Windows 系统滚动（仅 Windows） |
+| 🍎 core-graphics | 0.24 | macOS 系统滚动（仅 macOS） |
 
 ---
 

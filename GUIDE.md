@@ -8,7 +8,9 @@ rust-api/
 ├── Cargo.lock        # 依赖锁定文件（相当于 Java 的 lock 文件，自动生成，不要手动改）
 ├── .gitignore        # Git 忽略规则
 ├── src/
-│   └── main.rs       # 程序入口（相当于 Java 的 Application.java）
+│   ├── main.rs       # 程序入口（相当于 Java 的 Application.java）
+│   └── scroll.rs     # 跨平台系统滚动模块
+├── test.html         # WebSocket 测试页面（中文界面）
 └── target/           # 编译输出目录（相当于 Java 的 target/ 或 build/）
     └── debug/        # debug 模式编译产物
         └── rust-api.exe   # 编译后的可执行文件
@@ -21,6 +23,8 @@ rust-api/
 | `Cargo.toml` | 声明项目名称、版本、依赖 | `pom.xml` / `build.gradle` |
 | `Cargo.lock` | 锁定依赖的精确版本号 | Maven 的 `.flattened-pom.xml` |
 | `src/main.rs` | 程序主入口 | `Application.java` |
+| `src/scroll.rs` | 跨平台系统滚动（Windows/macOS） | 平台相关的 Service 层 |
+| `test.html` | WebSocket 测试页面 | 前端测试页面 |
 | `target/` | 编译输出目录 | `target/`（Maven）或 `build/`（Gradle） |
 
 ### Cargo.toml 关键字段
@@ -36,6 +40,14 @@ axum = "0.8"                # Web 框架（相当于 Spring Boot）
 tokio = { version = "1", features = ["full"] }  # 异步运行时
 serde = { version = "1", features = ["derive"] } # JSON 序列化/反序列化
 serde_json = "1"            # JSON 处理库
+colored = "2"               # 终端彩色输出
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-sys = { version = "0.61", features = [...] }  # Windows 系统滚动
+
+[target.'cfg(target_os = "macos")'.dependencies]
+core-graphics = { version = "0.24", features = ["highsierra"] }  # macOS 系统滚动
+core-foundation = "0.10"
 ```
 
 ---
@@ -82,6 +94,7 @@ cargo run
 Server running on http://localhost:3000
   GET /health         - 健康检查
   GET /greet?name=xxx - 问候接口
+  GET /ws/crown       - WebSocket 表冠控制（支持系统级滚动）
 ```
 
 ### 3.2 测试接口
@@ -308,3 +321,16 @@ src/
 1. 定义请求/响应结构体
 2. 写一个 `async fn` 处理函数
 3. 在 `Router::new().route()` 中注册路由
+
+### Q: 表冠控制能滚动其他窗口吗？
+可以。WebSocket 收到消息后会向**当前前台窗口**发送系统滚轮事件。支持 Windows 和 macOS，编译时自动选择平台实现。
+
+使用方法：
+1. `cargo run` 启动服务
+2. 打开 `test.html`，点击 **连接**
+3. 设置增量和速度，点击 **开始定时滚动**
+4. 切换到要滚动的窗口（点击目标窗口使其成为前台）
+5. 目标窗口开始滚动
+
+### Q: macOS 上滚动不生效？
+macOS 需要在系统设置中授予终端应用「辅助功能」权限（系统设置 → 隐私与安全性 → 辅助功能）。
