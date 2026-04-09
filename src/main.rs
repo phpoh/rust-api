@@ -1,4 +1,5 @@
 mod scroll;
+mod screenshot;
 
 use axum::{
     extract::ws::{Message, WebSocket, WebSocketUpgrade},
@@ -29,6 +30,12 @@ struct GreetRequest {
 struct GreetResponse {
     message: String,
     greeting: String,
+}
+
+#[derive(Serialize)]
+struct ScreenshotResponse {
+    status: String,
+    message: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -116,6 +123,19 @@ async fn greet(
     })
 }
 
+/// POST /screenshot - 触发全屏截图
+async fn take_screenshot() -> Json<ScreenshotResponse> {
+    screenshot::take_screenshot();
+    println!(
+        "{}",
+        "[SYSTEM] Screenshot: TRIGGERED".magenta().bold()
+    );
+    Json(ScreenshotResponse {
+        status: "ok".to_string(),
+        message: "Screenshot triggered".to_string(),
+    })
+}
+
 /// GET /ws/crown - WebSocket 表冠控制接口
 async fn crown_ws(ws: WebSocketUpgrade) -> impl IntoResponse {
     ws.on_upgrade(handle_crown)
@@ -199,7 +219,8 @@ async fn main() {
     let app = Router::new()
         .route("/health", get(health_check))
         .route("/greet", get(greet))
-        .route("/ws/crown", get(crown_ws));
+        .route("/ws/crown", get(crown_ws))
+        .route("/screenshot", get(take_screenshot));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
 
@@ -211,6 +232,7 @@ async fn main() {
     println!("  GET /health         - 健康检查");
     println!("  GET /greet?name=xxx - 问候接口");
     println!("  GET /ws/crown       - WebSocket 表冠控制");
+    println!("  GET /screenshot     - 触发全屏截图");
 
     axum::serve(listener, app).await.unwrap();
 }
