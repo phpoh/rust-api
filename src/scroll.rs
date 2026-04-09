@@ -28,21 +28,23 @@ fn windows_scroll(delta: i64, step: i64) {
         GetCursorPos, GetForegroundWindow, PostMessageW, WM_MOUSEWHEEL,
     };
 
+    // Clamp step to avoid i32 overflow when multiplying by 120
+    let clamped_step = step.min(i32::MAX as i64 / 120);
     let wheel_delta: i32 = if delta >= 0 {
-        (step as i32) * 120
+        (clamped_step as i32) * 120
     } else {
-        -((step as i32) * 120)
+        -((clamped_step as i32) * 120)
     };
 
     let hwnd = unsafe { GetForegroundWindow() };
     let mut point = POINT { x: 0, y: 0 };
     unsafe { GetCursorPos(&mut point) };
 
-    let w_param = ((wheel_delta as usize) << 16) as usize;
+    let w_param = (wheel_delta as isize) << 16;
     let l_param = ((point.y as isize) << 16) | (point.x as isize & 0xFFFF);
 
     unsafe {
-        PostMessageW(hwnd, WM_MOUSEWHEEL, w_param, l_param as isize);
+        PostMessageW(hwnd, WM_MOUSEWHEEL, w_param as usize, l_param as isize);
     }
 }
 
