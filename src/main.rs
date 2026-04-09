@@ -1,3 +1,5 @@
+mod scroll;
+
 use axum::{
     extract::ws::{Message, WebSocket, WebSocketUpgrade},
     response::IntoResponse,
@@ -148,6 +150,9 @@ async fn handle_crown(mut socket: WebSocket) {
                         // 科幻日志
                         sci_log(crown.delta, step, new_pos, velocity);
 
+                        // 触发系统滚动
+                        scroll::perform_scroll(crown.delta, step, crown.speed);
+
                         // 返回响应
                         let resp = CrownResponse {
                             position: new_pos,
@@ -197,6 +202,8 @@ async fn main() {
         .route("/ws/crown", get(crown_ws));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+
+    scroll::init();
     println!("{}", "╔══════════════════════════════════════╗".cyan());
     println!("{}", "║   Iron Man Holographic UI System     ║".cyan());
     println!("{}", "╚══════════════════════════════════════╝".cyan());
