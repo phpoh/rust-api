@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<title>DigitalCrown WebSocket Test</title>
+<title>数字表冠 WebSocket 测试</title>
 <style>
   body { font-family: monospace; background: #0a0a1a; color: #00ff88; padding: 20px; }
   h1 { color: #00ccff; }
@@ -13,16 +13,21 @@
 </style>
 </head>
 <body>
-<h1>[SYSTEM] DigitalCrown WebSocket Controller</h1>
-<p>Status: <span id="status">Disconnected</span></p>
-<button onclick="connect()">Connect</button>
-<button onclick="disconnect()">Disconnect</button>
+<h1>数字表冠 WebSocket 控制台</h1>
+<p>连接状态：<span id="status">未连接</span></p>
+<button onclick="connect()">连接</button>
+<button onclick="disconnect()">断开</button>
 <hr>
-<p>Delta: <input id="delta" type="number" value="5"> Speed: <input id="speed" type="number" value="0.3" step="0.1" min="0" max="1"></p>
-<button onclick="sendCrown()">Send Crown Input</button>
-<button onclick="rapidFire()">Rapid Fire (10x)</button>
+<p>增量：<input id="delta" type="number" value="5"> 速度：<input id="speed" type="number" value="0.3" step="0.1" min="0" max="1"></p>
+<button onclick="sendCrown()">发送</button>
+<button onclick="rapidFire()">连发 (10次)</button>
 <hr>
-<h2>Log</h2>
+<h2>定时滚动</h2>
+<p>间隔：<input id="interval" type="number" value="200" min="50" step="50"> 毫秒 &nbsp; 次数：<input id="count" type="number" value="50" min="1"> 次</p>
+<button id="autoBtn" onclick="toggleAuto()">开始定时滚动</button>
+<span id="autoStatus" style="color:#888;">已停止</span>
+<hr>
+<h2>日志</h2>
 <div id="log"></div>
 
 <script>
@@ -37,36 +42,72 @@
   function connect() {
     ws = new WebSocket('ws://localhost:3000/ws/crown');
     ws.onopen = () => {
-      document.getElementById('status').textContent = 'Connected';
+      document.getElementById('status').textContent = '已连接';
       document.getElementById('status').style.color = '#00ff88';
-      log('[SYSTEM] DigitalCrown Controller: ONLINE');
+      log('[系统] 数字表冠控制器：已上线');
     };
-    ws.onmessage = (e) => log('[RECV] ' + e.data);
+    ws.onmessage = (e) => log('[接收] ' + e.data);
     ws.onclose = () => {
-      document.getElementById('status').textContent = 'Disconnected';
+      document.getElementById('status').textContent = '已断开';
       document.getElementById('status').style.color = 'red';
-      log('[SYSTEM] DigitalCrown Controller: OFFLINE');
+      log('[系统] 数字表冠控制器：已离线');
     };
   }
 
   function disconnect() { if (ws) ws.close(); }
 
   function sendCrown() {
-    if (!ws || ws.readyState !== 1) { log('Not connected!'); return; }
+    if (!ws || ws.readyState !== 1) { log('未连接！'); return; }
     const data = { delta: parseInt(document.getElementById('delta').value), speed: parseFloat(document.getElementById('speed').value) };
     ws.send(JSON.stringify(data));
-    log('[SEND] ' + JSON.stringify(data));
+    log('[发送] ' + JSON.stringify(data));
   }
 
   function rapidFire() {
+    if (!ws || ws.readyState !== 1) { log('未连接！'); return; }
     for (let i = 0; i < 10; i++) {
       setTimeout(() => {
         const speed = 0.1 + (i * 0.09);
         const data = { delta: 3, speed };
         ws.send(JSON.stringify(data));
-        log('[SEND] ' + JSON.stringify(data));
+        log('[发送] ' + JSON.stringify(data));
       }, i * 200);
     }
+  }
+
+  let autoTimer = null;
+  function toggleAuto() {
+    if (autoTimer) {
+      clearInterval(autoTimer);
+      autoTimer = null;
+      document.getElementById('autoBtn').textContent = '开始定时滚动';
+      document.getElementById('autoStatus').textContent = '已停止';
+      document.getElementById('autoStatus').style.color = '#888';
+      log('[定时] 已停止');
+      return;
+    }
+    if (!ws || ws.readyState !== 1) { log('未连接！'); return; }
+    const interval = parseInt(document.getElementById('interval').value) || 200;
+    const count = parseInt(document.getElementById('count').value) || 50;
+    let sent = 0;
+    document.getElementById('autoBtn').textContent = '停止定时滚动';
+    document.getElementById('autoStatus').textContent = '运行中...';
+    document.getElementById('autoStatus').style.color = '#ff0';
+    log('[定时] 启动：共 ' + count + ' 次，间隔 ' + interval + 'ms');
+    autoTimer = setInterval(() => {
+      if (sent >= count || !ws || ws.readyState !== 1) {
+        clearInterval(autoTimer);
+        autoTimer = null;
+        document.getElementById('autoBtn').textContent = '开始定时滚动';
+        document.getElementById('autoStatus').textContent = '完成 (' + sent + '/' + count + ')';
+        document.getElementById('autoStatus').style.color = '#0f0';
+        log('[定时] 完成：已发送 ' + sent + ' 次');
+        return;
+      }
+      const data = { delta: parseInt(document.getElementById('delta').value), speed: parseFloat(document.getElementById('speed').value) };
+      ws.send(JSON.stringify(data));
+      sent++;
+    }, interval);
   }
 </script>
 </body>
