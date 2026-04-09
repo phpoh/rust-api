@@ -11,26 +11,8 @@ use colored::*;
 
 use serde::{Deserialize, Serialize};
 use std::sync::atomic::{AtomicI64, Ordering};
-use std::time::SystemTime;
 
 // ==================== 响应结构体 ====================
-
-#[derive(Serialize)]
-struct HealthResponse {
-    status: String,
-    timestamp: u64,
-}
-
-#[derive(Deserialize)]
-struct GreetRequest {
-    name: String,
-}
-
-#[derive(Serialize)]
-struct GreetResponse {
-    message: String,
-    greeting: String,
-}
 
 #[derive(Serialize)]
 struct ScreenshotResponse {
@@ -100,30 +82,7 @@ fn sci_log(delta: i64, _step: i64, position: i64, velocity: &str) {
 
 // ==================== 接口处理函数 ====================
 
-/// GET /health - 健康检查接口
-async fn health_check() -> Json<HealthResponse> {
-    let timestamp = SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)
-        .unwrap()
-        .as_secs();
-
-    Json(HealthResponse {
-        status: "ok".to_string(),
-        timestamp,
-    })
-}
-
-/// GET /greet?name=xxx - 问候接口
-async fn greet(
-    axum::extract::Query(params): axum::extract::Query<GreetRequest>,
-) -> Json<GreetResponse> {
-    Json(GreetResponse {
-        message: format!("Hello, {}!", params.name),
-        greeting: "Welcome to Rust API!".to_string(),
-    })
-}
-
-/// POST /screenshot - 触发全屏截图
+/// GET /screenshot - 触发全屏截图
 async fn take_screenshot() -> Json<ScreenshotResponse> {
     screenshot::take_screenshot();
     println!(
@@ -217,8 +176,6 @@ async fn handle_crown(mut socket: WebSocket) {
 #[tokio::main]
 async fn main() {
     let app = Router::new()
-        .route("/health", get(health_check))
-        .route("/greet", get(greet))
         .route("/ws/crown", get(crown_ws))
         .route("/screenshot", get(take_screenshot));
 
@@ -229,8 +186,6 @@ async fn main() {
     println!("{}", "║   Iron Man Holographic UI System     ║".cyan());
     println!("{}", "╚══════════════════════════════════════╝".cyan());
     println!("{}", "Server running on http://localhost:3000".green().bold());
-    println!("  GET /health         - 健康检查");
-    println!("  GET /greet?name=xxx - 问候接口");
     println!("  GET /ws/crown       - WebSocket 表冠控制");
     println!("  GET /screenshot     - 触发全屏截图");
 
