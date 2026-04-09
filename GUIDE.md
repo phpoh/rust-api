@@ -334,3 +334,10 @@ src/
 
 ### Q: macOS 上滚动不生效？
 macOS 需要在系统设置中授予终端应用「辅助功能」权限（系统设置 → 隐私与安全性 → 辅助功能）。
+
+---
+
+## 九、相关项目 / Related Projects
+
+- **[CrownScroll-WatchOS](https://github.com/phpoh/crown-scroll-watchos)** — Apple Watch 数字表冠客户端应用（SwiftUI + WebSocket），开箱即用。
+  Ready-made Apple Watch Digital Crown client app (SwiftUI + WebSocket).

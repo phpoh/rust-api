@@ -3,6 +3,11 @@
 > 本文档说明如何将 Apple Watch 的数字表冠（Digital Crown）与 Rust WebSocket 后端对接。
 > This document explains how to connect the Apple Watch Digital Crown to the Rust WebSocket backend.
 
+> **💡 已有现成的 WatchOS 客户端！**
+> **Ready-made WatchOS client available!**
+> 👉 **[CrownScroll-WatchOS](https://github.com/phpoh/crown-scroll-watchos)** — 完整的 SwiftUI Apple Watch 应用，开箱即用。
+> Complete SwiftUI Apple Watch app, ready to use.
+
 ---
 
 ## 一、架构概览 / Architecture Overview

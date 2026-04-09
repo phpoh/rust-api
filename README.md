@@ -5,6 +5,13 @@
 
 ---
 
+## 🍎 Apple Watch 客户端 / Apple Watch Client
+
+> **[CrownScroll-WatchOS](https://github.com/phpoh/crown-scroll-watchos)** — Apple Watch 数字表冠控制器，旋转表冠即可控制电脑滚动！
+> Apple Watch Digital Crown controller — rotate the crown to scroll your computer!
+
+---
+
 ## ✨ 项目特色
 
 | 功能 | 说明 |
@@ -226,3 +233,9 @@ chmod +x /opt/rust-api/rust-api
 ## 📜 License
 
 MIT License — 随便用！
+
+---
+
+## 🔗 Related Projects / 相关项目
+
+- **[CrownScroll-WatchOS](https://github.com/phpoh/crown-scroll-watchos)** — Apple Watch 数字表冠客户端 / Apple Watch Digital Crown client app
