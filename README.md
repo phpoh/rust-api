@@ -230,6 +230,10 @@ chmod +x /opt/rust-api/rust-api
 
 ---
 
+## ⭐ Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=phpoh/rust-api&type=Date)](https://star-history.com/#phpoh/rust-api&Date)
+
 ## 📜 License
 
 MIT License — 随便用！
