@@ -69,24 +69,24 @@ fn macos_screenshot() {
         let tap = CGEventTapLocation::HID;
 
         // Key down: Cmd → Shift → 3
-        if let Ok(event) = CGEvent::new_keyboard_event(&src, KVK_COMMAND, true) {
+        if let Ok(event) = CGEvent::new_keyboard_event(src.clone(), KVK_COMMAND, true) {
             event.post(tap);
         }
-        if let Ok(event) = CGEvent::new_keyboard_event(&src, KVK_SHIFT, true) {
+        if let Ok(event) = CGEvent::new_keyboard_event(src.clone(), KVK_SHIFT, true) {
             event.post(tap);
         }
-        if let Ok(event) = CGEvent::new_keyboard_event(&src, KVK_ANSI_3, true) {
+        if let Ok(event) = CGEvent::new_keyboard_event(src.clone(), KVK_ANSI_3, true) {
             event.post(tap);
         }
 
         // Key up: 3 → Shift → Cmd
-        if let Ok(event) = CGEvent::new_keyboard_event(&src, KVK_ANSI_3, false) {
+        if let Ok(event) = CGEvent::new_keyboard_event(src.clone(), KVK_ANSI_3, false) {
             event.post(tap);
         }
-        if let Ok(event) = CGEvent::new_keyboard_event(&src, KVK_SHIFT, false) {
+        if let Ok(event) = CGEvent::new_keyboard_event(src.clone(), KVK_SHIFT, false) {
             event.post(tap);
         }
-        if let Ok(event) = CGEvent::new_keyboard_event(&src, KVK_COMMAND, false) {
+        if let Ok(event) = CGEvent::new_keyboard_event(src, KVK_COMMAND, false) {
             event.post(tap);
         }
     }

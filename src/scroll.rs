@@ -71,7 +71,7 @@ fn macos_scroll(delta: i64, step: i64, speed: f64) {
     let source = CGEventSource::new(CGEventSourceStateID::HIDSystemState).ok();
 
     if let Some(src) = source {
-        if let Some(event) = CGEvent::new_scroll_event(&src, units, 1, scroll_count, 0, 0) {
+        if let Ok(event) = CGEvent::new_scroll_event(src, units, 1, scroll_count, 0, 0) {
             event.post(CGEventTapLocation::HID);
         }
     }
